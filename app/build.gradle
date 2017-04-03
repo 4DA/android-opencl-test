@@ -1,0 +1,54 @@
+apply plugin: 'com.android.model.application'
+
+def appDir = getProjectDir().toString()
+def includeDir = appDir + "/src/main/jni/include/"
+
+model {
+    android {
+        compileSdkVersion = 23
+        buildToolsVersion = "23.0.2"
+
+        defaultConfig.with {
+            applicationId = "opencl.androidtest"
+            minSdkVersion.apiLevel = 23
+            targetSdkVersion.apiLevel = 23
+            versionCode = 1
+            versionName = "1.0"
+        }
+
+        ndk {
+            moduleName = "opencltest"
+            cppFlags.add("-I${includeDir}".toString())
+
+            ldLibs.addAll(["android", "log", "jnigraphics"])
+            stl    = "gnustl_static"
+            cppFlags.add('-std=c++11')
+
+        }
+    }
+
+    android.buildTypes {
+        release {
+            // minifyEnabled = false
+            // proguardFiles = getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    android.productFlavors {
+        create("arm8") {
+            ndk.abiFilters.add("arm64-v8a")
+            ndk.ldFlags.add("-L${file('src/main/jniLibs/arm64-v8a')}".toString())
+            ndk.ldLibs.addAll(['OpenCL'])
+        }
+//        create("arm7") {
+//            ndk.abiFilters.add("armeabi-v7a")
+//            ndk.ldFlags.add("-L${file('src/main/jniLibs/armeabi-v7a')}".toString())
+//            ndk.ldLibs.addAll('OpenCL')
+//        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:23.1.1'
+}
